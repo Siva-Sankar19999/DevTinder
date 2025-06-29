@@ -11,7 +11,6 @@ app.use(express.json());
 app.post('/signup',async(req,res,next)=>{
 
     
-    console.log(req.body);
      const user1 = new User(req.body);
 
     try{
@@ -19,7 +18,7 @@ app.post('/signup',async(req,res,next)=>{
         res.send("Data Posted successfullly");
     }
     catch(err){
-        next(err);
+        res.status(401).send("Issue occured while signing up..!"+ err);
     }
 
     
