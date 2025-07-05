@@ -29,9 +29,29 @@ app.post('/signup',async(req,res,next)=>{
     }
     catch(err){
         res.status(401).send("Issue occured while signing up..!"+ err);
-    }
+    }  
+});
 
-    
+
+app.post("/login",async(req,res)=>{
+    try{
+        const {emailId,password} = req.body;
+        const user = await User.findOne({emailId:emailId});
+
+        if(!user){
+            throw new Error("Invalid Email-Id...");
+        }
+        const isPaswordValid = await bcrypt.compare(password,user.password);
+        if(isPaswordValid){
+            res.send("Login Successfully..!🥳");
+        }
+        else{
+            throw new Error("Invalid Password..!❌");
+        }
+
+    }catch(err){
+        res.status(401).send("Issue occured while logging up..!"+ err);
+    }
 });
 
 // get user
@@ -137,7 +157,7 @@ connectDB()
     console.log('server listening on port 3000');});
 })
 .catch(()=>{
-    console.log("Database is not connected successfully..!");
+    console.log("Database is not connected..!");
 });
 
 
