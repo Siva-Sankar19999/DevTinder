@@ -3,10 +3,13 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const validateData = require('./utils/validator');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -43,6 +46,8 @@ app.post("/login",async(req,res)=>{
         }
         const isPaswordValid = await bcrypt.compare(password,user.password);
         if(isPaswordValid){
+            const token = await jwt.sign({userId: user._id},"DEV@TENDER$01");
+            res.cookie("token",token);
             res.send("Login Successfully..!🥳");
         }
         else{
@@ -53,6 +58,34 @@ app.post("/login",async(req,res)=>{
         res.status(401).send("Issue occured while logging up..!"+ err);
     }
 });
+
+
+app.get("/profile",async(req,res)=>{
+    try{
+      
+       const cookies = req.cookies;
+       const {token} = cookies;
+
+       if(token){
+        const decodedMsg = await jwt.verify(token,"DEV@TENDER$01");
+        const {userId} = decodedMsg;
+        const userinfo = await User.findById(userId);
+        res.send(`Profile user is: ${userinfo}`);
+       }else{
+        throw new Error("token not there..!");
+       }
+
+
+        
+    }
+    catch(err){
+        res.status(401).send("Issue occured while getting profile.."+ err);
+    }
+});
+
+
+
+
 
 // get user
 app.get("/user",async(req,res)=>{
@@ -66,8 +99,6 @@ app.get("/user",async(req,res)=>{
         else {
             res.send(user);
         }
-            
-    
     }
     catch(err){
         res.send("Error occured while fetching Database..!");
