@@ -2,9 +2,7 @@ const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const validateData = require("./utils/validator");
-const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const userAuth = require('./middleware/auth');
 
 const app = express();
@@ -34,10 +32,10 @@ app.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("Invalid Email-Id...");
         }
-        const isPaswordValid = await bcrypt.compare(password, user.password);
+        const isPaswordValid = await user.validatePassword(password);
 
         if (isPaswordValid) {
-            const token = await jwt.sign({ userId: user._id }, "DEV@TENDER$01",{expiresIn:"1h"});
+            const token = await user.generateJWT();
             res.cookie("token", token,{ expires: new Date(Date.now() + 7 * 24* 60 * 60 * 1000) });
             res.send("Login Successfully..!🥳");
         } else {
