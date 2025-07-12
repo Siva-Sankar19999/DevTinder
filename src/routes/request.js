@@ -34,10 +34,51 @@ requestRouter.post("/request/send/:status/:userId", userAuth, async (req, res) =
         const connectionObject = new connectionRequest({ fromUserId: fromUserId, toUserId: toUserId, status: status });
         const connectionDataSent = await connectionObject.save();
 
-        res.send(`${req.user.firstName} sends a connectionRequest to ${validToUserId.firstName}`);
+        res.send(`${req.user.firstName}, sends a connectionRequest to ${validToUserId.firstName}`);
     } catch (err) {
         res.status(401).send("Issue occured while sending connection request.." + err);
     }
 });
+
+
+requestRouter.post('/request/review/:status/:reqId', userAuth, async(req,res)=>{
+    try{
+        const {status,reqId} = req.params;
+        const toUserId = req.user;
+        
+        const validStatus = ["accepted","rejected"];
+        if(!validStatus.includes(status)){
+            return res
+                   .status(404)
+                   .send("Invalid Status sent..!😡");
+        }
+
+        const reqMatched = await connectionRequest.findOne({
+            toUserId : toUserId._id,
+            status : "interested",
+            _id : reqId
+        });
+
+        if(!reqMatched){
+            return res
+                   .status(404)
+                   .send("Invalid Request-ID..!🤬");
+        }
+
+        reqMatched.status = status;
+        const data = await reqMatched.save();
+
+        res.json({
+            message : `${toUserId.firstName}, ${status} the request`,
+            data : data     
+        });
+
+    }
+    catch(err){
+        res.status(404).send(err + " Error occured during reviewing request");
+    }
+
+});
+
 
 module.exports = requestRouter;

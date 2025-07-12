@@ -13,7 +13,7 @@ authRouter.post("/signup", async (req, res, next) => {
         // creating document  
         const user1 = new User({ firstName, lastName, emailId, password: passwordHashed, age: age,skills: skills, gender: gender });
         await user1.save();
-        res.send("Data Posted successfullly");
+        res.send(`Hey, ${user1.firstName} thanks for signing up into the app..!`);
     } catch (err) {
         res.status(401).send("Issue occured while signing up..!" + err);
     }
@@ -31,7 +31,7 @@ authRouter.post("/login", async (req, res) => {
         if (isPaswordValid) {
             const token = await user.generateJWT();
             res.cookie("token", token, { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-            res.send("Login Successfully..!🥳");
+            res.send(`${user.firstName}, logged in successfully..!`);
         } else {
             throw new Error("Invalid Password..!❌");
         }
