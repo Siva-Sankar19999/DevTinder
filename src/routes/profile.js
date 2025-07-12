@@ -20,7 +20,6 @@ profileRouter.post("/profile/edit",userAuth,async (req,res)=>{
         }
         const loggedInUser = req.user;
         Object.keys(req.body).forEach(key=>loggedInUser[key]=req.body[key]);
-        console.log(loggedInUser,"logged In user..!");
         await loggedInUser.save();
         
         res.json({
