@@ -3,6 +3,8 @@ const userRouter = express.Router();
 const userAuth = require('../middleware/auth');
 const connectionRequests = require('../models/connectionRequests');
 
+const USER_SAFE_DATA = "firstName lastName photoURL age gender skills";
+
 userRouter.get('/user/requests/received/',userAuth,async(req,res)=>{
     try{
         const loggedInUser = req.user;
@@ -10,7 +12,10 @@ userRouter.get('/user/requests/received/',userAuth,async(req,res)=>{
         const fetchConnections = await connectionRequests.find({
             toUserId : loggedInUser,
             status: "interested"
-        }).populate("fromUserId","firstName lastName");
+        })
+        .populate("fromUserId",USER_SAFE_DATA);
+
+        
 
         res.json({
             messgage : "Data fetched successfully..!",
@@ -20,6 +25,42 @@ userRouter.get('/user/requests/received/',userAuth,async(req,res)=>{
     }
     catch(err){
        res.status(404).send("Error while fetching requests..!"+ err);
+    }
+});
+
+userRouter.get('/user/connections',userAuth,async(req,res)=>{
+    try{
+        const loggedInUser = req.user;
+        const connections = await connectionRequests.find({
+            $or: [
+                {fromUserId: loggedInUser, status: "accepted"},
+                {toUserId: loggedInUser, status: "accepted"}
+            ]
+        })
+        .populate("fromUserId",USER_SAFE_DATA)
+        .populate("toUserId",USER_SAFE_DATA);
+
+       if(!connections){
+        return res
+               .send("no connections");
+       }
+
+       const data = connections.map((row) => {
+        if(row.fromUserId._id.toString() == loggedInUser._id.toString()){
+            return row.toUserId.firstName;
+        }
+        return row.fromUserId.firstName;
+       }
+    );
+
+    
+        res.json({
+            data: data
+        })
+
+    }
+    catch(err){
+        res.status(404).send("Error while fetching connections..!")
     }
 });
 
