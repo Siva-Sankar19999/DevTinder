@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/request');
+const userRouter = require('./routes/user');
 
 const app = express();
 app.use(express.json());
@@ -12,9 +13,10 @@ app.use(cookieParser());
 app.use('/',authRouter);
 app.use('/',profileRouter);
 app.use('/',requestRouter);
+app.use('/',userRouter);
 
 app.use((req, res) => {
-    res.status(404).send("No Route there for that request..!");
+    res.status(404).send("No Route found for your request..!");
 });
 
 app.use((err, req, res, next) => {
