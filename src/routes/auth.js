@@ -8,10 +8,10 @@ const authRouter = express.Router();
 authRouter.post("/signup", async (req, res, next) => {
     try {
         validateSignupData(req);
-        const { firstName, lastName, emailId, password, age,skills, gender  } = req.body;
+        const { firstName, lastName, emailId, password, age,skills, gender, photoUrl, about  } = req.body;
         const passwordHashed = await bcrypt.hash(password, 10);
         // creating document  
-        const user1 = new User({ firstName, lastName, emailId, password: passwordHashed, age: age,skills: skills, gender: gender });
+        const user1 = new User({ firstName, lastName, emailId, password: passwordHashed, age: age,skills: skills, gender: gender, photoUrl:photoUrl, about: about});
         await user1.save();
         res.send(`Hey, ${user1.firstName} thanks for signing up into the app..!`);
     } catch (err) {
